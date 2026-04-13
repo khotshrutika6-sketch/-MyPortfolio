@@ -178,6 +178,30 @@ export default function App() {
     }
   };
 
+  const certificates = [
+    {
+      title: "Full Stack Web Development",
+      platform: "Meta",
+      emoji: "⚛️",
+      skills: ["React", "JavaScript", "Advanced UI"],
+      link: "#"
+    },
+    {
+      title: "UI/UX Design Essentials",
+      platform: "Google",
+      emoji: "🎨",
+      skills: ["Figma", "User Research", "Adobe XD"],
+      link: "#"
+    },
+    {
+      title: "AI & Machine Learning",
+      platform: "Stanford",
+      emoji: "🧠",
+      skills: ["Python", "TensorFlow", "Data Science"],
+      link: "#"
+    }
+  ];
+
   const projects = [
     {
       title: 'SenseLink – AI Accessibility',

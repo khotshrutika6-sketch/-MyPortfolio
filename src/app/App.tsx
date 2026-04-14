@@ -178,29 +178,7 @@ export default function App() {
     }
   };
 
-  const certificates = [
-    {
-      title: "Full Stack Web Development",
-      platform: "Meta",
-      emoji: "⚛️",
-      skills: ["React", "JavaScript", "Advanced UI"],
-      link: "#"
-    },
-    {
-      title: "UI/UX Design Essentials",
-      platform: "Google",
-      emoji: "🎨",
-      skills: ["Figma", "User Research", "Adobe XD"],
-      link: "#"
-    },
-    {
-      title: "AI & Machine Learning",
-      platform: "Stanford",
-      emoji: "🧠",
-      skills: ["Python", "TensorFlow", "Data Science"],
-      link: "#"
-    }
-  ];
+
 
   const projects = [
     {
@@ -766,72 +744,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* Certificates Section */}
-      <section id="certificates" className="relative z-10 py-24 md:py-32 px-6 bg-transparent">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Certificates 🎓</h2>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              Courses & certifications I've completed to sharpen my skills
-            </p>
-          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {certificates.map((cert, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
-                className="group relative rounded-[1.5rem] overflow-hidden border border-white/10 bg-white/[0.03] backdrop-blur-[12px] cursor-pointer transition-all duration-500 hover:border-[#00c6ff]/40 hover:shadow-[0_20px_40px_rgba(0,198,255,0.12)] hover:-translate-y-2"
-              >
-                {/* Card Face */}
-                <div className="p-8 flex flex-col items-center text-center gap-4 transition-all duration-500 group-hover:opacity-0 group-hover:scale-95">
-                  {/* Top shine */}
-                  <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#00c6ff]/40 transition-colors duration-500"></div>
-
-                  <div className="text-5xl mb-2">{cert.emoji}</div>
-                  <h3 className="text-lg font-bold text-white leading-tight">{cert.title}</h3>
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-400">
-                    {cert.platform}
-                  </span>
-                  <div className="flex flex-wrap gap-2 justify-center mt-1">
-                    {cert.skills.map((s) => (
-                      <span key={s} className="text-[11px] px-2.5 py-1 bg-[#00c6ff]/5 border border-[#00c6ff]/20 text-[#00c6ff] rounded-full font-medium">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/70 backdrop-blur-[10px] flex flex-col items-center justify-center gap-5 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-95 group-hover:scale-100 p-8 text-center">
-                  <div className="text-4xl">{cert.emoji}</div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
-                    <p className="text-[#00c6ff] text-sm font-medium">{cert.platform}</p>
-                  </div>
-                  <a
-                    href={cert.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] rounded-xl font-bold text-white text-sm hover:shadow-[0_0_20px_rgba(0,198,255,0.5)] hover:scale-105 transition-all"
-                  >
-                    View Certificate →
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Resume Section */}
       <section id="resume" className="relative z-10 py-32 px-6 bg-transparent">

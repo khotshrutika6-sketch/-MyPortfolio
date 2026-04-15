@@ -25,8 +25,11 @@ import {
   Binary,
   Brain,
   FlaskConical,
-  Cpu
+  Cpu,
+  Menu,
+  X
 } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 import heroVideo from '../imports/hero-bg.mp4.mp4';
 import profileImage from '../assets/profile.png';
 import senselinkImg from '../assets/senselink.png';
@@ -36,6 +39,7 @@ import daysyncImg from '../assets/daysync.png';
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [typedText, setTypedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -47,7 +51,7 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const projectCategories = ['All', 'AI', 'Web', 'Apps'];
 
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Global Mouse Move for Glow Effect
   useEffect(() => {
@@ -248,8 +252,39 @@ export default function App() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleContactSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    formData.append("access_key", "f1e3b578-dfa9-43d6-b856-ddd4113c0b3f");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Message sent successfully! I will get back to you soon.');
+        (event.target as HTMLFormElement).reset();
+      } else {
+        console.error("Error", data);
+        toast.error(data.message || 'Something went wrong. Please try again later.');
+      }
+    } catch (error) {
+       console.error("Network Error", error);
+       toast.error('Network error. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="bg-black text-white min-h-screen relative overflow-hidden">
+      <Toaster theme="dark" position="bottom-right" richColors />
       {/* Global Wow Element: Mouse Follow Glow */}
       {/* Global Wow Element: Mouse Follow Glow */}
       <div 
@@ -278,8 +313,8 @@ export default function App() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-4 left-4 right-4 md:top-6 md:left-auto md:right-auto md:w-[600px] md:translate-x-[-50%] md:ml-[50%] z-[100] transition-all duration-300 rounded-2xl ${
-          isScrolled 
-            ? 'bg-white/5 backdrop-blur-[12px] border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
+          isScrolled || isMobileMenuOpen
+            ? 'bg-black/90 md:bg-white/5 backdrop-blur-[12px] border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
             : 'bg-transparent backdrop-blur-none border border-transparent'
         }`}
       >
@@ -289,6 +324,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
             className="flex items-center group cursor-pointer"
+            onClick={() => scrollToSection('hero')}
           >
             <div className="text-3xl font-black tracking-tighter bg-gradient-to-r from-[#00c6ff] to-[#0072ff] bg-clip-text text-transparent transition-all duration-300 group-hover:rotate-12 group-hover:drop-shadow-[0_0_10px_rgba(0,198,255,0.8)]">
               SK<span className="text-white">.</span>
@@ -313,11 +349,50 @@ export default function App() {
               </motion.button>
             ))}
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden flex items-center">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-300 hover:text-white transition-colors p-1"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Nav Dropdown */}
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="md:hidden px-6 pb-6 overflow-hidden border-t border-white/10"
+          >
+            <div className="flex flex-col gap-4 pt-4">
+              {['About', 'Skills', 'Projects', 'Resume', 'Contact'].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    scrollToSection(item.toLowerCase());
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-sm text-left transition-all duration-300 py-2 border-b border-white/5 ${
+                    activeSection === item.toLowerCase() ? 'text-[#00c6ff] font-bold' : 'text-gray-300 hover:text-[#00c6ff]'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </motion.nav>
 
       {/* Hero Section */}
-      <section id="hero" className="relative min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex flex-col pt-24 pb-6 overflow-hidden">
+        {/* Spacer for vertical centering */}
+        <div className="flex-1"></div>
+
         {/* Hero Content */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <motion.h1
@@ -396,16 +471,21 @@ export default function App() {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
-          className="absolute bottom-6 sm:bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce"
-        >
-          <div className="p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-[0_0_15px_rgba(0,198,255,0.2)]">
-            <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-[#00c6ff]/90" />
-          </div>
-        </motion.div>
+        <div className="flex-1 flex items-end justify-center pb-4 mt-8 z-20">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3 }}
+            className="animate-bounce"
+          >
+            <div 
+              className="p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-[0_0_15px_rgba(0,198,255,0.2)] cursor-pointer hover:bg-white/10 transition-colors"
+              onClick={() => scrollToSection('about')}
+            >
+              <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-[#00c6ff]/90" />
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* About Section */}
@@ -705,15 +785,24 @@ export default function App() {
                   </div>
 
                   {/* Buttons */}
-                  <div className="mt-auto">
+                  <div className="mt-auto flex flex-wrap gap-3">
                     <a
                       href={project.demo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/btn inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] rounded-lg font-bold text-white text-sm hover:shadow-[0_0_20px_rgba(0,198,255,0.4)] hover:scale-105 transition-all"
+                      className="group/btn inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] rounded-lg font-bold text-white text-sm hover:shadow-[0_0_20px_rgba(0,198,255,0.4)] hover:scale-105 transition-all"
                     >
                       <ExternalLink className="w-4 h-4 group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5 transition-transform" />
                       Live Demo
+                    </a>
+                    <a
+                      href={project.github !== '#' ? project.github : 'https://github.com/khotshrutika6-sketch'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/btn2 inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 backdrop-blur-md border border-white/20 rounded-lg font-bold text-white text-sm hover:bg-white/10 hover:border-white/40 hover:scale-105 transition-all"
+                    >
+                      <Github className="w-4 h-4 group-hover/btn2:rotate-[-10deg] transition-transform" />
+                      Source
                     </a>
                   </div>
                 </motion.div>
@@ -957,6 +1046,7 @@ export default function App() {
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
               className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 space-y-6"
+              onSubmit={handleContactSubmit}
             >
               <h3 className="text-2xl font-bold mb-6">Send a Message</h3>
 
@@ -964,6 +1054,8 @@ export default function App() {
                 <label className="block text-sm font-medium mb-2">Name</label>
                 <input
                   type="text"
+                  name="name"
+                  required
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="Your name"
                 />
@@ -973,6 +1065,8 @@ export default function App() {
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input
                   type="email"
+                  name="email"
+                  required
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="your@email.com"
                 />
@@ -981,6 +1075,8 @@ export default function App() {
               <div>
                 <label className="block text-sm font-medium mb-2">Message</label>
                 <textarea
+                  name="message"
+                  required
                   rows={5}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-orange-500 transition-colors resize-none"
                   placeholder="Your message..."
@@ -989,34 +1085,82 @@ export default function App() {
 
               <button
                 type="submit"
-                className="w-full px-8 py-4 bg-gradient-to-r from-orange-500 to-purple-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.02]"
+                disabled={isSubmitting}
+                className={`w-full px-8 py-4 bg-gradient-to-r from-orange-500 to-purple-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.02] ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </motion.form>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 bg-transparent border-t border-white/10">
+      {/* Premium Glassmorphism Footer */}
+      <footer className="relative z-10 pt-20 pb-10 px-6 bg-black/60 border-t border-white/10 mt-12 backdrop-blur-xl">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00c6ff]/30 to-transparent"></div>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © 2026 Shrutika Khot. All rights reserved.
-            </p>
-
-            <div className="flex gap-6">
-              <a href="https://github.com/khotshrutika6-sketch" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-orange-400 transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="https://www.linkedin.com/in/shrutika-khot-708219380/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-orange-400 transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="mailto:khotshrutika6@gmail.com" className="text-gray-400 hover:text-orange-400 transition-colors">
-                <Mail className="w-5 h-5" />
-              </a>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+            
+            {/* Brand Column */}
+            <div className="col-span-1 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
+              <div className="text-3xl font-black tracking-tighter bg-gradient-to-r from-[#00c6ff] to-[#0072ff] bg-clip-text text-transparent mb-4 cursor-pointer hover:drop-shadow-[0_0_10px_rgba(0,198,255,0.8)] transition-all duration-300" onClick={() => scrollToSection('hero')}>
+                SK<span className="text-white">.</span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+                Designing smooth, scalable & aesthetic web experiences. Let's build something amazing together.
+              </p>
             </div>
+
+            {/* Quick Links Column */}
+            <div className="col-span-1 flex flex-col items-center md:items-start">
+              <h4 className="text-white font-bold mb-6 text-lg">Quick Links</h4>
+              <ul className="space-y-4">
+                {['About', 'Skills', 'Projects', 'Resume', 'Contact'].map((item) => (
+                  <li key={item}>
+                    <button
+                      onClick={() => scrollToSection(item.toLowerCase())}
+                      className="text-gray-400 hover:text-[#00c6ff] transition-colors text-sm hover:translate-x-1 inline-block transform duration-300"
+                    >
+                      {item}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Socials & Contact Column */}
+            <div className="col-span-1 flex flex-col items-center md:items-start">
+              <h4 className="text-white font-bold mb-6 text-lg">Connect</h4>
+              <div className="flex gap-4">
+                <a href="https://github.com/khotshrutika6-sketch" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00c6ff]/10 hover:border-[#00c6ff]/40 hover:-translate-y-1 transition-all group shadow-[0_0_10px_rgba(0,0,0,0.5)] hover:shadow-[0_0_15px_rgba(0,198,255,0.4)]">
+                  <Github className="w-5 h-5 text-gray-400 group-hover:text-[#00c6ff]" />
+                </a>
+                <a href="https://www.linkedin.com/in/shrutika-khot-708219380/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00c6ff]/10 hover:border-[#00c6ff]/40 hover:-translate-y-1 transition-all group shadow-[0_0_10px_rgba(0,0,0,0.5)] hover:shadow-[0_0_15px_rgba(0,198,255,0.4)]">
+                  <Linkedin className="w-5 h-5 text-gray-400 group-hover:text-[#00c6ff]" />
+                </a>
+                <a href="mailto:khotshrutika6@gmail.com" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00c6ff]/10 hover:border-[#00c6ff]/40 hover:-translate-y-1 transition-all group shadow-[0_0_10px_rgba(0,0,0,0.5)] hover:shadow-[0_0_15px_rgba(0,198,255,0.4)]">
+                  <Mail className="w-5 h-5 text-gray-400 group-hover:text-[#00c6ff]" />
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-white/10">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} Shrutika Khot. All rights reserved.
+            </p>
+            
+            <button
+              onClick={() => scrollToSection('hero')}
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#00c6ff] transition-colors group"
+            >
+              Back to top
+              <div className="p-1.5 rounded-full bg-white/5 group-hover:bg-[#00c6ff]/20 transition-colors">
+                <ChevronDown className="w-4 h-4 rotate-180" />
+              </div>
+            </button>
           </div>
         </div>
       </footer>
